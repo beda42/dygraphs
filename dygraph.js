@@ -3116,6 +3116,7 @@ Dygraph.prototype.parseDataTable_ = function(data) {
   // TODO(danvk): add support back for errorBars
   var labels = [data.getColumnLabel(0)];
   for (i = 0; i < colIdx.length; i++) {
+    if (this.attr_("customBars")) i += 1;
     labels.push(data.getColumnLabel(colIdx[i]));
     if (this.attr_("errorBars")) i += 1;
   }
@@ -3158,16 +3159,30 @@ Dygraph.prototype.parseDataTable_ = function(data) {
           annotations.push(ann);
         }
       }
-
       // Strip out infinities, which give dygraphs problems later on.
       for (j = 0; j < row.length; j++) {
         if (!isFinite(row[j])) row[j] = null;
       }
     } else {
-      for (j = 0; j < cols - 1; j++) {
-        row.push([ data.getValue(i, 1 + 2 * j), data.getValue(i, 2 + 2 * j) ]);
+      if (this.attr_("customBars")) {
+    	/* custom bars */
+    	for (j = 0; j < cols -1; j++) {
+    	  var col1 = colIdx[3 * j];
+    	  var col2 = colIdx[3 * j + 1];
+    	  var col3 = colIdx[3 * j + 2];
+          row.push([data.getValue(i, col1), data.getValue(i, col2),
+                    data.getValue(i, col3)]);
+   	    }
+      } else {
+      	/* custom bars */
+      	for (j = 0; j < cols -1; j++) {
+      	  var col1 = colIdx[3 * j];
+      	  var col2 = colIdx[3 * j + 1];
+          row.push([data.getValue(i, col1), data.getValue(i, col2)]);
+        }
       }
     }
+    
     if (ret.length > 0 && row[0] < ret[ret.length - 1][0]) {
       outOfOrder = true;
     }
