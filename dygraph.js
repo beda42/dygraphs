@@ -2053,7 +2053,7 @@ Dygraph.prototype.addXTicks_ = function() {
 Dygraph.prototype.extremeValues_ = function(series) {
   var minY = null, maxY = null, j, y;
 
-  var bars = this.attr_("errorBars") || this.attr_("customBars");
+  var bars = this.attr_("errorBars"); // || this.attr_("customBars");
   if (bars) {
     // With custom bars, maxY is the max of the high values.
     for (j = 0; j < series.length; j++) {
@@ -2169,7 +2169,7 @@ Dygraph.prototype.gatherDatasets_ = function(rolledSeries, dateWindow) {
     // Prune down to the desired range, if necessary (for zooming)
     // Because there can be lines going to points outside of the visible area,
     // we actually prune to visible points, plus one on either side.
-    var bars = this.attr_("errorBars") || this.attr_("customBars");
+    var bars = this.attr_("errorBars"); // || this.attr_("customBars");
     if (dateWindow) {
       var low = dateWindow[0];
       var high = dateWindow[1];
@@ -2715,11 +2715,19 @@ Dygraph.prototype.rollingAverage = function(originalData, rollPeriod) {
         }
       }
       if (count) {
-        rollingData[i] = [originalData[i][0], [ 1.0 * mid / count,
-                                                1.0 * (mid - low) / count,
-                                                1.0 * (high - mid) / count ]];
+        if (this.attr_("errorBars")){
+          rollingData[i] = [originalData[i][0], [ 1.0 * mid / count,
+                                                  1.0 * (mid - low) / count,
+                                                  1.0 * (high - mid) / count ]];
+        } else {
+          rollingData[i] = [originalData[i][0], 1.0 * mid / count];
+        }
       } else {
-        rollingData[i] = [originalData[i][0], [null, null, null]];
+    	if (this.attr_("errorBars")){
+    	  rollingData[i] = [originalData[i][0], [null, null, null]];
+    	} else {
+    	  rollingData[i] = [originalData[i][0], null];
+    	}
       }
     }
   } else {
